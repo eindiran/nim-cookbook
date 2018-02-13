@@ -40,7 +40,8 @@ proc print_seq_info(input_seq: seq[string]): void =
 proc get_seq_slice(lower_bound: int, upper_bound: int, s: seq[string]): seq[string] =
     ## Take as input two seq indices and a seq and return a slice
     var return_slice: seq[string] = newSeq[string]()
-    for i in lower_bound..upper_bound:
+    # This should work like the Python: seq[lower_bound:upper_bound]
+    for i in lower_bound..upper_bound-1:
         try:
             return_slice.add(s[i])
         except IndexError:
@@ -54,33 +55,88 @@ proc generate_ngrams(n: int, tokens: seq[string]): seq[string] =
     var ngram_list: seq[string] = newSeq[string]() # New seq for output
     for i in 1..n-1:
         tokens_mut.insert("<s>", 0) # Add sentence start tokens
+        tokens_mut.add("</s>") # Add sentence end tokens
     var num_tokens: int = tokens_mut.len
-    for i in 0..num_tokens:
+    for i in 0..num_tokens-1:
         var low_bound: int = i + n
         var high_bound: int = min(low_bound, num_tokens) + 1
-        for j in low_bound..high_bound:
+        for j in low_bound..high_bound-1:
             var tokens_slice: seq[string] = get_seq_slice(i, j, tokens_mut)
             let current_ngram: string = join(tokens_slice, sep=" ")
             ngram_list.add(current_ngram)
     return ngram_list
 
 
+proc print_vocab(): void =
+    ## Demonstrate that we can read in a vocab file
+    var vocab_table: Table[string, int] = read_vocab("input_file.txt")
+    print_kv_pairs(vocab_table)
+
+
+proc build_test_seq(): seq[string] =
+    ## Generate a seq[string] for testing
+    var result_seq = newSeq[string]()
+    result_seq.add("Zero")
+    result_seq.add("One")
+    result_seq.add("Two")
+    result_seq.add("Three")
+    result_seq.add("Four")
+    result_seq.add("Five")
+    result_seq.add("Six")
+    result_seq.add("Seven")
+    return result_seq
+
+
+proc test_unigrams(): void =
+    ## Print out info for unigrams
+    var test_seq = build_test_seq()
+    var unigram_list = generate_ngrams(1, test_seq)
+    print_seq_info(unigram_list)
+
+
+proc test_bigrams(): void =
+    ## Print out info for bigrams
+    var test_seq = build_test_seq()
+    var bigram_list = generate_ngrams(2, test_seq)
+    print_seq_info(bigram_list)
+
+
+proc test_trigrams(): void =
+    ## Print out info for trigrams
+    var test_seq = build_test_seq()
+    var trigram_list = generate_ngrams(3, test_seq)
+    print_seq_info(trigram_list)
+
+
+proc test_4grams(): void =
+    ## Print out info for 4-grams
+    var test_seq = build_test_seq()
+    var four_gram_list = generate_ngrams(4, test_seq)
+    print_seq_info(four_gram_list)
+
+
+proc test_ngrams(): void =
+    ## Do unigrams to 4-grams for test_seq
+    echo("Running unigrams:\n")
+    test_unigrams()
+    echo("\nRunning bigrams:\n")
+    test_bigrams()
+    echo("\nRunning trigrams:\n")
+    test_trigrams()
+    echo("\nRunning 4-grams:\n")
+    test_4grams()
+    echo("\nDone!")
+
+
+proc test_seq_slice(): void =
+    ## Test that get_seq_slice behaves as expected
+    var test_seq = build_test_seq()
+    var test_slice = get_seq_slice(2, 5, test_seq)
+    print_seq_info(test_slice)
+
+
 when isMainModule:
     proc main =
         ## Main function
-        #var vocab_table: Table[string, int] = read_vocab("input_file.txt")
-        #print_kv_pairs(vocab_table)
-        var my_seq = newSeq[string]()
-        my_seq.add("Zero")
-        my_seq.add("One")
-        my_seq.add("Two")
-        my_seq.add("Three")
-        my_seq.add("Four")
-        my_seq.add("Five")
-        my_seq.add("Six")
-        my_seq.add("Seven")
-        #var my_seq_two = get_seq_slice(2, 5, my_seq)
-        #print_seq_info(my_seq_two)
-        var my_seq3 = generate_ngrams(2, my_seq)
-        print_seq_info(my_seq3)
+        test_ngrams()
     main()
