@@ -13,14 +13,6 @@ proc read_vocab(vocab_file: string): Table[string, int] =
     return vocab_table
 
 
-proc print_keys(input_table: Table[string, int]): void =
-    ## Debugging function, used to print the keys in a table.
-    var i: int = 0
-    for key in keys[string](input_table):
-        echo("Key ", i, ": ", key)
-        inc(i)
-
-
 proc print_kv_pairs(input_table: Table[string, int]): void =
     ## Debugging function, used to print the key-value pairs in a table.
     var i: int = 0
@@ -67,7 +59,16 @@ proc generate_ngrams(n: int, tokens: seq[string]): seq[string] =
     return ngram_list
 
 
-proc print_vocab(): void =
+proc write_ngram_counts(filename: string, ngram_counts: Table[string, int]): void =
+    ## Write an ngram count Table to file
+    var out_file = open(filename, fmWrite)
+    for ngram in keys(ngram_counts):
+        var count: int = ngram_counts[ngram]
+        out_file.write(ngram & "\t" & $count & "\n")
+    out_file.close()
+
+
+proc test_build_vocab(): void =
     ## Demonstrate that we can read in a vocab file
     var vocab_table: Table[string, int] = read_vocab("input_file.txt")
     print_kv_pairs(vocab_table)
@@ -135,8 +136,25 @@ proc test_seq_slice(): void =
     print_seq_info(test_slice)
 
 
+proc test_write_ngram_counts(): void =
+    ## Test our output function
+    var output_file: string = "ngram_counts.bigrams"
+    var ngram_counts: Table[string, int] = {"<s> Zero": 3,
+                                            "Zero One": 2,
+                                            "One Two": 1,
+                                            "Six Seven": 14}.toTable
+    echo("Writing file...")
+    write_ngram_counts(output_file, ngram_counts)
+    echo("Done!")
+
+
 when isMainModule:
     proc main =
         ## Main function
+        let debug: bool = false
+        if debug:
+            test_write_ngram_counts()
+            test_seq_slice()
+            test_build_vocab()
         test_ngrams()
     main()
