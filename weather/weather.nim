@@ -89,6 +89,10 @@ proc get_wttrin_url(): string =
             "wttr.in/" & zipcode
         else:
             "wttr.in"
+    if units == Celsius:
+        wttrin_url.add("?m")
+    else:
+        wttrin_url.add("?u")
     return wttrin_url
     
 
@@ -101,8 +105,9 @@ proc get_wttrin_data(wttrin_url: string): void =
     cmd_currenttime =
         if location_id == LocName:
             "currenttime -l " & location_str & " --date --dow"
-        elif location_id == ZipCode:
-            "currenttime -l " & zipcode & " --date --dow"
+        # TODO: Add currenttime functionality to make this work
+        #elif location_id == ZipCode:
+        #    "currenttime -l " & zipcode & " --date --dow"
         else:
             "currenttime --date --dow"
     discard execShellCmd(cmd_currenttime)
