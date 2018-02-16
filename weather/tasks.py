@@ -85,4 +85,5 @@ def clean_all(ctx):
     clean_location(ctx)
     clean_ternary(ctx)
     clean_weather(ctx)
+    run('rm -rf __pycache__')
     print('All cleaning tasks complete.')
