@@ -37,6 +37,27 @@ def build_all(ctx):
     build_weather(ctx)
 
 
+@task(name='test_loc')
+def test_location(ctx):
+    """Run the tests for the location submodule."""
+    print('Running tests for the location module.')
+    run('cd location && nim compile -d:release location_handler && ./location_handler')
+
+
+@task(name='test_ternary')
+def test_ternary(ctx):
+    """Run the tests for the ternary submodule."""
+    print('Running tests for the ternary module.')
+    run('cd ternary && nim compile -d:release ternary && ./ternary')
+
+
+@task(name='test')
+def test_all(ctx):
+    """Run all the tests."""
+    test_location(ctx)
+    test_ternary(ctx)
+
+
 @task(name='clean_loc')
 def clean_location(ctx):
     """Clean up the build artifacts for the location_handler submodule."""
